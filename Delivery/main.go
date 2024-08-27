@@ -17,11 +17,11 @@ import (
 )
 
 func main() {
-
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+
 	mongoURI := os.Getenv("MONGO_URL")
 	clientOptions := options.Client().ApplyURI(mongoURI)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
@@ -31,20 +31,24 @@ func main() {
 	defer client.Disconnect(context.TODO())
 
 	userDatabase := client.Database("Blog_management")
-
 	userCollection := userDatabase.Collection("User")
-
 	tokenCollection := userDatabase.Collection("Token")
-	userRepository := Repository.NewUserRepository(userCollection, tokenCollection)
+	logCollection := userDatabase.Collection("Logs") // Collection for system logs
 
-	// Initialize the Email Service
+	userRepository := Repository.NewUserRepository(userCollection, tokenCollection)
+	loanRepository := Repository.NewLoanRepository(userCollection)
+	logRepository := Repository.NewLogRepository(logCollection) // Create log repository
+
 	emailService := infrastructure.NewEmailService()
 
-	// Initialize the User Usecase with the User Repository and Email Service
 	userUsecase := Usecases.NewUserUsecase(userRepository, emailService)
+	loanUsecase := Usecases.NewLoanUsecase(loanRepository)
+	logUsecase := Usecases.NewLogUsecase(logRepository) // Create log usecase
+
 	userController := controller.NewUserController(userUsecase)
+	loanController := controller.NewLoanController(loanUsecase)
+	logController := controller.NewLogController(logUsecase) // Create log controller
 
-	router := router.SetupRouter(userController, tokenCollection)
+	router := router.SetupRouter(userController, loanController, logController, tokenCollection)
 	log.Fatal(router.Run(":8080"))
-
 }

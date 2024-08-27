@@ -216,12 +216,12 @@ func (uc *UserController) Logout(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User logged out successfully"})
 }
 
-func (uc *UserController) Verify(c *gin.Context) {
-	token := c.Param("token")
-	err := uc.UserUsecase.Verify(token)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"message": "Email verified successfully"})
-}
+// func (uc *UserController) Verify(c *gin.Context) {
+// 	token := c.Param("token")
+// 	err := uc.UserUsecase.Verify(token)
+// 	if err != nil {
+// 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+// 		return
+// 	}
+// 	c.JSON(http.StatusOK, gin.H{"message": "Email verified successfully"})
+// }
